@@ -13,12 +13,18 @@ void free_memory(struct list* F) {
         free(T);
     }
 }
+void print_list(struct list* F) {
+    struct list* T;
+    for (T = F;T != NULL;T = T->next) {
+        printf("%d ", T->inf);
+    }
+}
 int main() {
     setlocale(0, "");
-    struct list* F, * P, * T, * F1, * P1, * T1, * prev, * T2;
+    struct list* F, * P, * T, * PU, * U, *T1, *prev, *T2;
     int a, x, t = 0;
     char ch;
-    F = P = T = F1 = P1 = T1 = prev = T2 = NULL;
+    F = P = T = PU = U = T1 = prev = T2 = NULL;
     while (1) {
         printf("Добавить элемент (1-да, все остальное-нет) ");
         x = scanf("%d%c", &a, &ch);
@@ -53,65 +59,59 @@ int main() {
         printf("Введён пустой список");
         return 0;
     }
-    for (T = F; T != NULL; T = T->next) {
-        if (T->inf >= 0)
-            continue;
-        T1 = (struct list*)malloc(sizeof(struct list));
-        if (T1 == NULL) {
-            free_memory(F);
-            free_memory(F1);
-            printf("Ошибка выделения памяти");
-            return 0;
-        }
-        T1->next = NULL;
-        T1->inf = T->inf;
-        if (F1 == NULL) {
-            F1 = T1;
-            P1 = T1;
+    printf("Исходный список\n");
+    print_list(F);
+    PU = F;
+    while (PU->next != NULL) {
+        U = PU->next;
+        if (U->inf >= 0) {
+            PU->next = U->next;
+            free(U);
         }
         else {
-            P1->next = T1;
-            P1 = T1;
+            PU = U;
         }
     }
-    if (F1 == NULL) {
-        printf("В списке нет отрицательных элементов");
-        free_memory(F);
+    if (F->inf >= 0) {
+        T = F;
+        F = F->next;
+        free(T);
+    }
+    if (F == NULL) {
+        printf("\nВ списке нет отрицательных элементов");
         return 0;
     }
-    if (F1->next != NULL) {
-        P1 = NULL;
+    if (F->next != NULL) {
+        P = NULL;
         while (t == 0) {
             t = 1;
-            T1 = F1;
+            T = F;
             prev = NULL;
-            while (T1->next != P1) {
-                T2 = T1->next;
-                if (T1->inf > T2->inf) {
+            while (T->next != P) {
+                T1 = T->next;
+                if (T->inf > T1->inf) {
                     t = 0;
+                    T2 = T1->next;
+                    T1->next = T;
+                    T->next = T2;
                     if (prev == NULL) {
-                        F1 = T2;
+                        F = T1;
+                        prev = F;
                     }
                     else {
-                        prev->next = T2;
+                        prev->next = T1;
+                        prev = T1;
                     }
-                    T1->next = T2->next;
-                    T2->next = T1;
-                    prev = T2;
                 }
                 else {
-                    prev = T1;
-                    T1 = T1->next;
+                    prev = T;
+                    T = T->next;
                 }
             }
-            P1 = T1;
         }
     }
-    printf("Отсортированный список отрицательных элементов: ");
-    for (T1 = F1; T1 != NULL; T1 = T1->next) {
-        printf("%d ", T1->inf);
-    }
-    free_memory(F1);
+    printf("\nПолучен список\n");
+    print_list(F);
     free_memory(F);
     return 0;
 }
